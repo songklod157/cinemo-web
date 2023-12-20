@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-}
+const { parsed: localEnv } = require('dotenv').config({
+  path: `./.env.${process.env.NEXT_PUBLIC_ENV || 'dev'}`,
+});
 
-module.exports = nextConfig
+module.exports = {
+  env: localEnv,
+};
