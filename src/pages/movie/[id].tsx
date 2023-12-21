@@ -54,14 +54,25 @@ const StyledRating = styled(Rating)({
     color: theme.palette.primary.light,
   },
 });
-
+const BoxContainer = styled(Box)(({ theme }) => ({
+  display: "flex",
+  backgroundColor: theme.palette.secondary.dark,
+  width: "100%",
+  flexDirection: "column",
+}));
+const BoxContent = styled(Box)(({ theme }) => ({
+  display: "flex",
+  backgroundColor: theme.palette.secondary.dark,
+  width: "100%",
+  flexDirection: "column",
+  padding: "4%",
+}));
 const MovieDetail = () => {
   const router = useRouter();
   const { id } = router.query;
   const { data: session } = useSession();
   const movies = useSelector((state: RootState) => state.movies.data);
   const movie = movies.find((m) => m.id === Number(id));
-  console.log(movie);
 
   useEffect(() => {
     if (!id) return;
@@ -71,54 +82,96 @@ const MovieDetail = () => {
     if (!session) router.replace("/login");
   }, [session]);
   return (
-    <Box width="100%" height="100vh" bgcolor={theme.palette.secondary.dark}>
-      <Stack
-        direction="row"
-        spacing={12}
-        justifyContent="space-between"
-        mt={8}
-        ml={8}
-      >
-        <CardMedia
-          sx={{ height: "50vh", width: "450px" }}
-          image={movie?.poster_url}
-          title="movie details"
-        />
-        <Stack direction="column" spacing={2}>
-          <StyledRating
-            disabled
-            name="customized-color"
-            defaultValue={4}
-            precision={4}
-            icon={<StarIcon fontSize="large" />}
-            emptyIcon={<StarIcon fontSize="large" />}
-          />
-          <BtnWatch>Watch Now</BtnWatch>
+    <BoxContainer>
+      <BoxContent>
+        <Grid container sx={{ height: "100vh" }}>
+          <Grid item xs={6}>
+            <CardMedia
+              sx={{ height: "100vh", width: "100%" }}
+              image={movie?.poster_url}
+              title="movie details"
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <Stack
+              direction="column"
+              spacing={3}
+              color={theme.palette.secondary.dark}
+              p={2}
+            >
+              <Typography
+                variant="h4"
+                fontWeight="600"
+                color="white"
+                sx={{ opacity: "0.8" }}
+              >
+                {movie?.title_en}
+              </Typography>
+              <StyledRating
+                disabled
+                name="customized-color"
+                defaultValue={4}
+                precision={4}
+                icon={<StarIcon fontSize="large" />}
+                emptyIcon={<StarIcon fontSize="large" />}
+              />
+              <BtnWatch>Watch Now</BtnWatch>
+              <Typography variant="body2" color="white" sx={{ opacity: "0.8" }}>
+                {movie?.synopsis_en}
+              </Typography>
+            </Stack>
+          </Grid>
+        </Grid>
+      </BoxContent>
+      <BoxContent>
+        <Stack
+          direction="row"
+          spacing={3}
+          color={theme.palette.secondary.dark}
+          p={2}
+        >
           <Typography
-            variant="h4"
+            variant="body1"
             fontWeight="600"
             color="white"
             sx={{ opacity: "0.8" }}
           >
-            {movie?.title_en}
+            Genre:
           </Typography>
-          <Grid container>
-            <Grid item xs={7}>
-              <Typography
-                fontWeight="100"
-                color="white"
-                sx={{ opacity: "0.6" }}
-              >
-                Lorem ipsum dolor sit amet consectetur adipisicing elit. Rerum
-                sed soluta recusandae expedita, numquam tempore pariatur
-                voluptates. Temporibus eum, exercitationem dolorem ipsum facilis
-                alias deserunt cumque ea quis harum enim.
-              </Typography>
-            </Grid>
-          </Grid>
+          <Typography
+            variant="body1"
+            fontWeight="200"
+            color="white"
+            sx={{ opacity: "0.8" }}
+          >
+            {movie?.genre}
+          </Typography>
         </Stack>
-      </Stack>
-    </Box>
+        <Stack
+          direction="row"
+          spacing={3}
+          color={theme.palette.secondary.dark}
+          p={2}
+        >
+          <Typography
+            variant="body1"
+            fontWeight="600"
+            color="white"
+            sx={{ opacity: "0.8" }}
+          >
+            Actor:
+          </Typography>
+          <Typography
+            variant="body1"
+            fontWeight="200"
+            color="white"
+            sx={{ opacity: "0.8" }}
+          >
+            {movie?.actor}
+          </Typography>
+        </Stack>
+      </BoxContent>
+    </BoxContainer>
   );
 };
 

@@ -23,6 +23,10 @@ import { Avatar, Badge, Typography } from "@mui/material";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useRouter } from "next/navigation";
 import { purple, red } from "@mui/material/colors";
+import { selectFavoriteMovies } from "@/slices/moviesSlice";
+import { useSelector } from "react-redux";
+import { useEffect } from "react";
+import { RootState } from "@/stores";
 
 const drawerWidth = 240;
 
@@ -33,7 +37,7 @@ const openedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.enteringScreen,
   }),
   overflowX: "hidden",
-  backgroundColor:'#172025',
+  backgroundColor: "#172025",
 });
 
 const closedMixin = (theme: Theme): CSSObject => ({
@@ -42,7 +46,7 @@ const closedMixin = (theme: Theme): CSSObject => ({
     duration: theme.transitions.duration.leavingScreen,
   }),
   overflowX: "hidden",
-  backgroundColor:'#172025',
+  backgroundColor: "#172025",
   width: `calc(${theme.spacing(7)} + 1px)`,
   [theme.breakpoints.up("sm")]: {
     width: `calc(${theme.spacing(10)} + 1px)`,
@@ -71,8 +75,8 @@ const Drawer = styled(MuiDrawer, {
   flexShrink: 0,
   whiteSpace: "nowrap",
   boxSizing: "border-box",
-  backgroundColor:'red',
-  
+  backgroundColor: "red",
+
   ...(open && {
     ...openedMixin(theme),
     "& .MuiDrawer-paper": openedMixin(theme),
@@ -97,6 +101,8 @@ export default function SideBar() {
   const theme = useTheme();
   const [open, setOpen] = React.useState(false);
   const router = useRouter();
+  const favoriteMovies = useSelector(selectFavoriteMovies);
+  const isLogin = useSelector((state: RootState) => state.auth.user?.isLogin);
 
   const handleDrawerOpen = () => {
     setOpen(true);
@@ -114,12 +120,11 @@ export default function SideBar() {
       return;
     }
   };
-
   return (
-    <Box sx={{ display: "flex"  }}>
+    <Box sx={{ display: "flex" }}>
       <CssBaseline />
-      {session ? (
-        <Drawer variant="permanent" open={open} >
+      {isLogin === true && session ? (
+        <Drawer variant="permanent" open={open}>
           <DrawerTitle>
             {open && (
               <AccountZone>
@@ -144,7 +149,7 @@ export default function SideBar() {
               sx={{
                 marginTop: 2,
                 ...(open && { display: "none" }),
-                color: 'white'
+                color: "white",
               }}
             >
               <Avatar
@@ -158,9 +163,9 @@ export default function SideBar() {
             {open && (
               <IconButton onClick={handleDrawerClose}>
                 {theme.direction === "rtl" ? (
-                  <ChevronRightIcon sx={{color: 'white' }}/>
+                  <ChevronRightIcon sx={{ color: "white" }} />
                 ) : (
-                  <ChevronLeftIcon sx={{color: 'white' }}/>
+                  <ChevronLeftIcon sx={{ color: "white" }} />
                 )}
               </IconButton>
             )}
@@ -171,7 +176,7 @@ export default function SideBar() {
               sx={{
                 marginRight: 1.5,
                 ...(open && { display: "none" }),
-                color: 'white'
+                color: "white",
               }}
             >
               <MenuIcon />
@@ -185,7 +190,7 @@ export default function SideBar() {
                   sx={{
                     minHeight: 48,
                     justifyContent: open ? "initial" : "center",
-                    color:'white'
+                    color: "white",
                   }}
                   onClick={() => handleChangeTab(index)}
                 >
@@ -200,10 +205,17 @@ export default function SideBar() {
                       px: 5,
                     }}
                   >
-                    {index === 0 && <AppsIcon sx={{color: theme.palette.primary.light }} />}
+                    {index === 0 && (
+                      <AppsIcon sx={{ color: theme.palette.primary.light }} />
+                    )}
                     {index === 1 && (
-                      <Badge badgeContent={1} color="primary">
-                        <FavoriteIcon sx={{ color: theme.palette.primary.light}} />
+                      <Badge
+                        badgeContent={favoriteMovies.length}
+                        color="primary"
+                      >
+                        <FavoriteIcon
+                          sx={{ color: theme.palette.primary.light }}
+                        />
                       </Badge>
                     )}
                   </ListItemIcon>
@@ -220,7 +232,7 @@ export default function SideBar() {
                     minHeight: 48,
                     justifyContent: open ? "initial" : "center",
                     px: 5,
-                    color:'white'
+                    color: "white",
                   }}
                   onClick={() => signOut()}
                 >

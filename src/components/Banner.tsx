@@ -74,7 +74,7 @@ const BannerContentComponent = () => {
         >
           <BoxOpaLeft />
           <BoxOpaRight />
-          <Stack direction="column" spacing={2} sx={{ padding: "7%" }}>
+          <Stack direction="column" spacing={2} sx={{ padding: "6%" }}>
             <Typography
               variant="h4"
               fontWeight="600"

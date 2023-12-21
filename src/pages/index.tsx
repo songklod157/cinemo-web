@@ -2,28 +2,14 @@
 
 import BannerContentComponent from "@/components/Banner";
 import Movie from "@/components/Movie";
-import {
-  BtnCate,
-  CategoryContent,
-  CategoryContentText,
-  ContainerContent,
-  ContainerMain,
-  ContainerSide,
-  ContentWrapper,
-  GameContent,
-  HeadContent,
-} from "@/layouts";
-import {
-  Box,
-  InputAdornment,
-  Stack,
-  TextField,
-  Typography,
-  styled,
-} from "@mui/material";
-import { useSession } from "next-auth/react";
+import { ContainerMain } from "@/layouts";
+import { clearUser, setUser } from "@/slices/authSlice";
+import { AppDispatch, RootState } from "@/stores";
+import { Box, styled } from "@mui/material";
+import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { useEffect} from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 export const BannerContent = styled(Box)(() => ({
   marginTop: "40px",
@@ -37,15 +23,13 @@ type Props = {};
 const Home = (props: Props) => {
   const { data: session } = useSession();
   const router = useRouter();
-
-
+  const dispatch = useDispatch<AppDispatch>();
   useEffect(() => {
-    if (!session) router.replace("/login");
-  }, [session]);
-
-  // useEffect(() => {
-  //   if (status === "unauthenticated") router.replace("/login");
-  // }, [status]);
+    if (!session) {
+      dispatch(clearUser());
+      router.replace("/login");
+    }
+  }, [session, dispatch]);
   return (
     <ContainerMain>
       <BannerContentComponent />

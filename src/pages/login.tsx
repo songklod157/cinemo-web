@@ -1,6 +1,8 @@
 "use client";
 import { BtnLogin } from "@/layouts";
-import { setUser } from "@/slices/authSlice";
+import { clearUser, setUser } from "@/slices/authSlice";
+import { AppDispatch } from "@/stores";
+import { theme } from "@/theme";
 import {
   Box,
   Divider,
@@ -10,20 +12,20 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import React, { FormEventHandler, useState } from "react";
+import React, { FormEventHandler, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 
-export const Container = styled("div")(() => ({
-  backgroundColor: "#eeeeee",
+export const Container = styled("div")(({theme}) => ({
+  backgroundColor: theme.palette.secondary.light,
   width: "100%",
 }));
 export const LoginLayout = styled(Box)(() => ({
   width: "100%",
   justifyContent: "center",
 }));
-export const LoginBox = styled(Box)(() => ({
+export const LoginBox = styled(Box)(({theme}) => ({
   padding: "10%",
   justifyContent: "center",
 }));
@@ -34,7 +36,7 @@ const style = {
   transform: "translate(-50%, -50%)",
   width: 400,
   height: "auto",
-  bgcolor: "background.paper",
+  bgcolor: "white",
   border: "none",
   boxShadow: 24,
   p: 4,
@@ -43,7 +45,7 @@ const style = {
 type Props = {};
 
 const Login = (props: Props) => {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const [login, setLogin] = useState({ email: "", password: "" });
   const onSubmit: FormEventHandler<HTMLFormElement> = async (e: any) => {
@@ -59,6 +61,8 @@ const Login = (props: Props) => {
         router.push("/");
     }
   };
+
+  dispatch(clearUser())
   return (
     <Container>
       <LoginLayout>
@@ -72,6 +76,7 @@ const Login = (props: Props) => {
                     variant="h5"
                     component="h2"
                     fontWeight="600"
+                    color={theme.palette.primary.dark}
                   >
                     Sign In
                   </Typography>
@@ -81,7 +86,7 @@ const Login = (props: Props) => {
                   <TextField
                     id="outlined-basic"
                     type="text"
-                    label="Email"
+                    label="Username"
                     variant="outlined"
                     value={login.email}
                     onChange={({ target }) =>

@@ -1,8 +1,12 @@
-import { fetchMovies } from "@/slices/moviesSlice";
+import {
+  addFavorite,
+  fetchMovies,
+  selectIsFetched,
+  selectLastFetched,
+} from "@/slices/moviesSlice";
 import { AppDispatch, RootState } from "@/stores";
 import { theme } from "@/theme";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-
 import {
   Box,
   Card,
@@ -14,11 +18,9 @@ import {
   Typography,
   styled,
 } from "@mui/material";
-import axios from "axios";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/dist/client/router";
-
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
 interface Movie {
@@ -37,63 +39,15 @@ const BoxContent = styled(Box)(({ theme }) => ({
 }));
 
 type Props = {};
-const movie = [
-  {
-    id: 1,
-    name: " Lizards are a widespread group of squamate",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 2,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 3,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 4,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 5,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 6,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-  {
-    id: 7,
-    name: "Movie2",
-    img: "https://cdn.marvel.com/content/1x/spidermannwh_hardcover.jpg",
-    description:
-      "lorem Ips incorrectly description  of the movie in question and without the author",
-  },
-];
+
 const Movie = (props: Props) => {
   const { data: session } = useSession();
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   const movies = useSelector((state: RootState) => state.movies.data);
   const loading = useSelector((state: RootState) => state.movies.loading);
+  const isFetched = useSelector(selectIsFetched);
+  const lastFetched = useSelector(selectLastFetched);
 
   const showDetails = (id: number) => {
     if (!session) {
@@ -102,13 +56,43 @@ const Movie = (props: Props) => {
       router.push("/movie/" + id);
     }
   };
+  const handleAddFavorite = (movieId: number) => {
+    dispatch(addFavorite(movieId));
+  };
 
-  useEffect(() => {
+  const fetchMoviesCallback = useCallback(() => {
     dispatch(fetchMovies());
   }, [dispatch]);
 
+  useEffect(() => {
+    // Fetch movies only if they haven't been fetched or if it's been more than a certain time interval
+    const fetchInterval = 60000; //1 min
+    const shouldFetchMovies =
+      !isFetched || Date.now() - lastFetched > fetchInterval;
+
+    if (shouldFetchMovies) {
+      fetchMoviesCallback();
+    }
+  }, [fetchMoviesCallback, isFetched, lastFetched]);
+
+  if (!isFetched) {
+    return (
+      <BoxContent>
+        <Typography variant="body1" fontWeight="2x00" color="white">
+          Loading...
+        </Typography>
+      </BoxContent>
+    );
+  }
+
   if (loading === "pending") {
-    return <div>Loading...</div>;
+    return (
+      <BoxContent>
+        <Typography variant="body1" fontWeight="2x00" color="white">
+          Loading...
+        </Typography>
+      </BoxContent>
+    );
   }
 
   return (
@@ -125,19 +109,20 @@ const Movie = (props: Props) => {
               <Card
                 sx={{
                   maxWidth: 345,
-                  cursor: "pointer",
                   backgroundColor: theme.palette.secondary.main,
                 }}
-                onClick={() => showDetails(m.id)}
               >
                 <CardContent>
-                  <CardMedia
-                    component="img"
-                    width="100%"
-                    height="auto"
-                    image={m.poster_url}
-                    alt="Paella dish"
-                  ></CardMedia>
+                  <div onClick={() => showDetails(m.id)}>
+                    <CardMedia
+                      component="img"
+                      width="100%"
+                      height="auto"
+                      image={m.poster_url}
+                      alt="Paella dish"
+                      sx={{ cursor: "pointer" }}
+                    ></CardMedia>
+                  </div>
                   <Stack
                     direction="row"
                     spacing={2}
@@ -146,6 +131,7 @@ const Movie = (props: Props) => {
                     alignItems="center"
                   >
                     <Typography
+                      component="span"
                       variant="body1"
                       fontWeight="400"
                       color="white"
@@ -153,8 +139,13 @@ const Movie = (props: Props) => {
                     >
                       {m.title_en}
                     </Typography>
-                    <IconButton aria-label="fav">
-                      <FavoriteIcon />
+                    <IconButton
+                      aria-label="fav"
+                      onClick={() => handleAddFavorite(m.id)}
+                    >
+                      <FavoriteIcon
+                        sx={{ color: m.favorite === true ? "pink" : "primary" }}
+                      />
                     </IconButton>
                   </Stack>
                 </CardContent>
